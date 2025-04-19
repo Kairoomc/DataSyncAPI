@@ -1,0 +1,5 @@
+name: DataSyncAPI
+main: me.kairo.libs.api.DataSyncAPI
+version: 1.0.0
+author: Kairo
+description: API de synchronisation de données pour les serveurs Minecraft
