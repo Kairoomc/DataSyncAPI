@@ -26,9 +26,10 @@ dependencies {
     implementation("com.github.kairoomc:DataSyncAPI:1.0.0")
 }
 
+```
 ## 🔧 Exemple d'intégration
 
-
+```java
 // Lecture
 DataSyncAPI.getInstance().getManager().getData(player.getUniqueId(), data -> {
     int points = data.getInt("points");
