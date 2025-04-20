@@ -1,4 +1,3 @@
-// build.gradle.kts
 plugins {
     java
     `maven-publish`

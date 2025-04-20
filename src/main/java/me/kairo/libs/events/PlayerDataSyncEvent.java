@@ -6,31 +6,56 @@ import org.bukkit.event.HandlerList;
 
 import java.util.UUID;
 
-public class PlayerDataSyncEvent extends Event {
+/**
+ * Event triggered when a player's data is synchronized via Redis.
+ */
+public final class PlayerDataSyncEvent extends Event {
 
     private static final HandlerList handlers = new HandlerList();
 
-    private final UUID playerUUID;
+    private final UUID uuid;
     private final PlayerData data;
 
-    public PlayerDataSyncEvent(UUID playerUUID, PlayerData data) {
-        this.playerUUID = playerUUID;
+    /**
+     * Constructs a new PlayerDataSyncEvent.
+     *
+     * @param uuid the UUID of the player whose data was synchronized
+     * @param data the synchronized player data
+     */
+    public PlayerDataSyncEvent(final UUID uuid, final PlayerData data) {
+        this.uuid = uuid;
         this.data = data;
     }
 
-    public UUID getPlayerUUID() {
-        return playerUUID;
+    /**
+     * Gets the UUID of the player whose data was synchronized.
+     *
+     * @return the player's UUID
+     */
+    public UUID getUuid() {
+        return this.uuid;
     }
 
+    /**
+     * Gets the synchronized player data.
+     *
+     * @return the player data
+     */
     public PlayerData getData() {
-        return data;
+        return this.data;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public HandlerList getHandlers() {
         return handlers;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public static HandlerList getHandlerList() {
         return handlers;
     }

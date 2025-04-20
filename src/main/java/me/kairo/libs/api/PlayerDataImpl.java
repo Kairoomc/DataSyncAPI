@@ -6,43 +6,96 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
-
-public class PlayerDataImpl implements PlayerData {
+/**
+ * Default implementation of the PlayerData interface.
+ */
+public final class PlayerDataImpl implements PlayerData {
 
     private final UUID uuid;
     private final Map<String, Object> data;
 
-    public PlayerDataImpl(UUID uuid) {
+    /**
+     * Constructs a new PlayerDataImpl for the given player UUID.
+     *
+     * @param uuid the player's UUID
+     */
+    public PlayerDataImpl(final UUID uuid) {
         this.uuid = uuid;
         this.data = new HashMap<>();
     }
 
-    public UUID getUUID() { return uuid; }
+    /**
+     * {@inheritDoc}
+     */
+    public UUID getUuid() {
+        return this.uuid;
+    }
 
-    public Object get(String key) { return data.get(key); }
+    /**
+     * {@inheritDoc}
+     */
+    public Object get(final String key) {
+        return this.data.get(key);
+    }
 
-    public int getInt(String key) { return (int) data.getOrDefault(key, 0); }
+    /**
+     * {@inheritDoc}
+     */
+    public int getInt(final String key) {
+        return (int) this.data.getOrDefault(key, 0);
+    }
 
-    public String getString(String key) { return (String) data.getOrDefault(key, ""); }
+    /**
+     * {@inheritDoc}
+     */
+    public String getString(final String key) {
+        return (String) this.data.getOrDefault(key, "");
+    }
 
-    public boolean getBoolean(String key) { return (boolean) data.getOrDefault(key, false); }
+    /**
+     * {@inheritDoc}
+     */
+    public boolean getBoolean(final String key) {
+        return (boolean) this.data.getOrDefault(key, false);
+    }
 
-    public void set(String key, Object value) { data.put(key, value); }
+    /**
+     * {@inheritDoc}
+     */
+    public void set(final String key, final Object value) {
+        this.data.put(key, value);
+    }
 
-    public Map<String, Object> getAll() { return data; }
+    /**
+     * {@inheritDoc}
+     */
+    public Map<String, Object> getAll() {
+        return this.data;
+    }
 
     private static final Gson gson = new Gson();
 
-    public static String toJson(PlayerData data) {
+    /**
+     * Serializes the given PlayerData to a JSON string.
+     *
+     * @param data the PlayerData to serialize
+     * @return the JSON representation
+     */
+    public static String toJson(final PlayerData data) {
         return gson.toJson(data.getAll());
     }
 
-    public static PlayerData fromJson(UUID uuid, String json) {
-        PlayerDataImpl impl = new PlayerDataImpl(uuid);
-        Map<String, Object> map = gson.fromJson(json, Map.class);
+    /**
+     * Deserializes a PlayerDataImpl from a JSON string.
+     *
+     * @param uuid the player's UUID
+     * @param json the JSON data
+     * @return a new PlayerDataImpl instance
+     */
+    public static PlayerData fromJson(final UUID uuid, final String json) {
+        final PlayerDataImpl impl = new PlayerDataImpl(uuid);
+        final Map<String, Object> map = gson.fromJson(json, Map.class);
+
         impl.data.putAll(map);
         return impl;
     }

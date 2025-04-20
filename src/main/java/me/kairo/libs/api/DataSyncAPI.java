@@ -6,36 +6,40 @@ import me.kairo.libs.utils.BukkitUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
-public class DataSyncAPI extends JavaPlugin {
+public final class DataSyncAPI extends JavaPlugin {
 
     private static DataSyncAPI instance;
-    private DataSyncManager manager;
+
     private ConfigManager configManager;
+    private DataSyncManager dataSyncManager;
 
     @Override
     public void onEnable() {
         instance = this;
-        saveDefaultConfig();
 
+        this.saveDefaultConfig();
         this.configManager = new ConfigManager(this);
 
         BukkitUtils.init(this);
 
-        this.manager = new DataSyncManager(this, configManager);
-
-        getLogger().info("[DataSyncAPI] Plugin activé avec succès.");
+        this.dataSyncManager = new DataSyncManager(this, this.configManager);
+        this.getLogger().info("[DataSyncAPI] Plugin activé avec succès.");
     }
 
     @Override
     public void onDisable() {
-        getLogger().info("[DataSyncAPI] Plugin désactivé.");
+        this.getLogger().info("[DataSyncAPI] Plugin désactivé.");
     }
 
     public static DataSyncAPI getInstance() {
         return instance;
     }
 
-    public DataSyncManager getManager() {
-        return manager;
+    public ConfigManager getConfigManager() {
+        return this.configManager;
+    }
+
+    public DataSyncManager getDataSyncManager() {
+        return this.dataSyncManager;
     }
 }

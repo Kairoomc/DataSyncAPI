@@ -1,19 +1,30 @@
 package me.kairo.libs.utils;
+
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 
-public class BukkitUtils {
+/**
+ * Utility class for running tasks synchronously or asynchronously on the Bukkit server.
+ */
+public final class BukkitUtils {
 
     private static Plugin plugin;
 
-    public static void init(Plugin pl) {
+    /**
+     * Initializes the utility with the given plugin instance.
+     *
+     * @param pl the plugin instance to use for scheduling tasks
+     */
+    public static void init(final Plugin pl) {
         plugin = pl;
     }
 
     /**
-     * Exécute du code sur le thread principal
+     * Executes code on the main server thread.
+     *
+     * @param runnable the code to execute
      */
-    public static void runSync(Runnable runnable) {
+    public static void runSync(final Runnable runnable) {
         if (Bukkit.isPrimaryThread()) {
             runnable.run();
         } else {
@@ -22,23 +33,41 @@ public class BukkitUtils {
     }
 
     /**
-     * Exécute du code de manière asynchrone
+     * Executes code asynchronously.
+     *
+     * @param runnable the code to execute
      */
-    public static void runAsync(Runnable runnable) {
+    public static void runAsync(final Runnable runnable) {
         Bukkit.getScheduler().runTaskAsynchronously(plugin, runnable);
     }
 
     /**
-     * Exécute du code avec un délai en ticks
+     * Executes code after a specified delay (in ticks).
+     *
+     * @param runnable the code to execute
+     * @param delay    the delay in ticks before execution
      */
-    public static void runLater(Runnable runnable, long delay) {
+    public static void runLater(final Runnable runnable, final long delay) {
         Bukkit.getScheduler().runTaskLater(plugin, runnable, delay);
     }
 
     /**
-     * Exécute du code en boucle avec un intervalle
+     * Executes code repeatedly with a specified delay and interval (in ticks).
+     *
+     * @param runnable the code to execute
+     * @param delay    the initial delay in ticks before first execution
+     * @param period   the interval in ticks between executions
      */
-    public static void runTimer(Runnable runnable, long delay, long period) {
+    public static void runTimer(final Runnable runnable, final long delay, final long period) {
         Bukkit.getScheduler().runTaskTimer(plugin, runnable, delay, period);
+    }
+    
+    /**
+     * Executes code on the main server thread immediately.
+     *
+     * @param runnable the code to execute
+     */
+    public static void run(final Runnable runnable) {
+        Bukkit.getScheduler().runTask(plugin, runnable);
     }
 }
