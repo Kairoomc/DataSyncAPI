@@ -45,5 +45,5 @@ DataSyncAPI.getInstance().getManager().saveAndSync(data);
 @EventHandler
 public void onDataSync(PlayerDataSyncEvent event) {
     PlayerData data = event.getData();
-    Bukkit.getLogger().info("Données synchronisées pour : " + event.getPlayerUUID());
+    Bukkit.getLogger().info("Données synchronisées pour : " + event.getUuid());
 }
