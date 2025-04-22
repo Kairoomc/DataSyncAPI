@@ -43,39 +43,53 @@ public final class SQLStorage {
      * @param uuid the player's UUID
      * @return the loaded PlayerData, or a new instance if not found
      */
-    public PlayerData load(final UUID uuid) {
-        try (final Connection connection = this.dataSource.getConnection();
-             final PreparedStatement stmt = connection.prepareStatement("SELECT data FROM player_data WHERE uuid = ?")) {
-            stmt.setString(1, uuid.toString());
-            final ResultSet rs = stmt.executeQuery();
-            if (rs.next()) {
-                final String json = rs.getString("data");
+    public PlayerData load(UUID uuid) {
+        PlayerDataImpl data = new PlayerDataImpl(uuid);
+        String sql = "SELECT * FROM player_data WHERE uuid = ?";
 
-                return PlayerDataImpl.fromJson(uuid, json);
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, uuid.toString());
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                data.set("kills", rs.getInt("kills"));
+                data.set("deaths", rs.getInt("deaths"));
+                data.set("coins", rs.getInt("coins"));
+                data.set("isPremium", rs.getBoolean("isPremium"));
             }
-        } catch (final SQLException exception) {
-            exception.printStackTrace();
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
-        return new PlayerDataImpl(uuid);
+
+        return data;
     }
+
 
     /**
      * Saves player data to the database.
      *
      * @param data the PlayerData to save
      */
-    public void save(final PlayerData data) {
-        final String json = PlayerDataImpl.toJson(data);
-        try (final Connection connection = this.dataSource.getConnection();
-             final PreparedStatement stmt = connection.prepareStatement(
-                     "REPLACE INTO player_data (uuid, data) VALUES (?, ?)")) {
-            stmt.setString(1, data.getUUID().toString());
-            stmt.setString(2, json);
+    public void save(PlayerData data) {
+        String sql = "REPLACE INTO player_data (uuid, kills, deaths, coins, isPremium) VALUES (?, ?, ?, ?, ?)";
+
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, data.getUuid().toString());
+            stmt.setInt(2, data.getInt("kills"));
+            stmt.setInt(3, data.getInt("deaths"));
+            stmt.setInt(4, data.getInt("coins"));
+            stmt.setBoolean(5, data.getBoolean("isPremium"));
+
             stmt.executeUpdate();
-        } catch (final SQLException exception) {
-            exception.printStackTrace();
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
+
 
     /**
      * Closes the SQL data source and releases resources.
@@ -88,14 +102,19 @@ public final class SQLStorage {
      * Creates the player_data table if it does not exist.
      */
     private void createTable() {
-        try (final Connection connection = this.dataSource.getConnection();
-             final PreparedStatement stmt = connection.prepareStatement(
-                     "CREATE TABLE IF NOT EXISTS player_data (" +
-                             "uuid VARCHAR(36) PRIMARY KEY, " +
-                             "data LONGTEXT NOT NULL)")) {
+        String sql = "CREATE TABLE IF NOT EXISTS player_data (" +
+                "uuid VARCHAR(36) PRIMARY KEY, " +
+                "kills INT DEFAULT 0, " +
+                "deaths INT DEFAULT 0, " +
+                "coins INT DEFAULT 0, " +
+                "isPremium BOOLEAN DEFAULT FALSE)";
+
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.executeUpdate();
-        } catch (final SQLException exception) {
-            exception.printStackTrace();
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
+
 }

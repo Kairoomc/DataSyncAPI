@@ -19,6 +19,8 @@ repositories {
 dependencies {
     compileOnly("org.spigotmc:spigot-api:1.8.8-R0.1-SNAPSHOT")
     implementation("redis.clients:jedis:4.4.3")
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.17.1")
+
     implementation("com.zaxxer:HikariCP:3.4.5")
 }
 

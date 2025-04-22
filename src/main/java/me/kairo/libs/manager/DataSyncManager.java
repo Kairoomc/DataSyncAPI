@@ -2,65 +2,52 @@ package me.kairo.libs.manager;
 
 import me.kairo.libs.api.PlayerData;
 import me.kairo.libs.api.PlayerDataImpl;
-import me.kairo.libs.api.SyncCallback;
-import me.kairo.libs.config.ConfigManager;
 import me.kairo.libs.utils.BukkitUtils;
-import org.bukkit.plugin.java.JavaPlugin;
+
 
 import java.util.UUID;
+import java.util.function.Consumer;
 
-/**
- * Manages the synchronization of player data between SQL and Redis.
- */
 public final class DataSyncManager {
 
-    private final SQLStorage sql;
-    private final RedisManager redis;
+    private final SQLStorage sqlStorage;
+    private final RedisManager redisManager;
+    private final DataCache dataCache;
 
-    /**
-     * Constructs a new DataSyncManager.
-     *
-     * @param plugin the JavaPlugin instance
-     * @param config the configuration manager
-     */
-    public DataSyncManager(final JavaPlugin plugin, final ConfigManager config) {
-        this.sql = new SQLStorage(config);
-        this.redis = new RedisManager(plugin, config);
+    public DataSyncManager(SQLStorage sqlStorage, RedisManager redisManager, DataCache dataCache) {
+        this.sqlStorage = sqlStorage;
+        this.redisManager = redisManager;
+        this.dataCache = dataCache;
     }
 
-    /**
-     * Asynchronously loads player data from SQL and returns it via callback on the main thread.
-     *
-     * @param uuid the player's UUID
-     * @param callback the callback to receive the data
-     */
-    public void getData(final UUID uuid, final SyncCallback callback) {
-        BukkitUtils.runAsync(() -> {
-            final PlayerData data = this.sql.load(uuid);
+    public void getData(UUID uuid, Consumer<PlayerData> callback) {
+        if (dataCache.has(uuid)) {
+            callback.accept(dataCache.get(uuid));
+            return;
+        }
 
-            BukkitUtils.run(() -> callback.onDataReceived(data));
+         BukkitUtils.runAsync(() -> {
+            PlayerData data = sqlStorage.load(uuid);
+            dataCache.set(uuid, data);
+
+            BukkitUtils.run(() -> callback.accept(data));
         });
     }
 
-    /**
-     * Creates a new PlayerData instance for the given UUID.
-     *
-     * @param uuid the player's UUID
-     * @return a new PlayerData instance
-     */
-    public PlayerData createData(final UUID uuid) {
-        return new PlayerDataImpl(uuid);
+    public void saveAndSync(PlayerData data) {
+        BukkitUtils.runAsync(() -> {
+            sqlStorage.save(data);
+            redisManager.broadcast(data);
+        });
     }
 
-    /**
-     * Saves player data to SQL and broadcasts it to other servers via Redis asynchronously.
-     *
-     * @param data the player data to save and sync
-     */
-    public void saveAndSync(final PlayerData data) {
-        BukkitUtils.runAsync(() -> {
-            this.sql.save(data);
-            this.redis.broadcast(data);
-        });
+    public PlayerData createData(UUID uuid) {
+        PlayerDataImpl data = new PlayerDataImpl(uuid);
+        dataCache.set(uuid, data);
+        return data;
+    }
+
+    public DataCache getCache() {
+        return this.dataCache;
     }
 }
